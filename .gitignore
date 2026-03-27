@@ -1,0 +1,17 @@
+.DS_Store
+
+# Xcode user data
+xcuserdata/
+**/xcuserdata/
+*.xcuserstate
+
+# Build artifacts
+DerivedData/
+.build/
+
+# Generated Xcode project (source of truth is project.yml)
+GlowLow.xcodeproj/
+
+# Swift Package Manager
+.swiftpm/
+Package.resolved

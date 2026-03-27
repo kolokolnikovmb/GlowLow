@@ -80,6 +80,7 @@ final class StorageService {
         return try? modelContext.fetch(descriptor).first
     }
 
+    @discardableResult
     func upsertSettings(
         notificationsEnabled: Bool? = nil,
         reminderHour: Int? = nil,

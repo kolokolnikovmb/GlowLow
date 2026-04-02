@@ -7,13 +7,15 @@ struct StatusButton: View {
 
     var body: some View {
         Button(action: action) {
-            VStack(spacing: AppSpacing.xSmall) {
-                Text(status.emoji)
-                    .font(.title2)
+            VStack(spacing: AppSpacing.small) {
+                Image(systemName: status.symbolName)
+                    .font(.system(size: status == .low ? 17 : 18, weight: .semibold))
+                    .frame(width: 20, height: 20)
                 Text(status.title)
                     .font(AppTypography.button)
             }
             .frame(maxWidth: .infinity)
+            .foregroundStyle(AppColors.primaryText)
             .padding(.vertical, AppSpacing.medium)
             .background(buttonBackground, in: RoundedRectangle(cornerRadius: 20))
             .overlay(
@@ -25,7 +27,7 @@ struct StatusButton: View {
     }
 
     private var buttonBackground: Color {
-        isSelected ? buttonColor.opacity(0.2) : Color.white.opacity(0.72)
+        isSelected ? buttonColor.opacity(0.22) : Color.white.opacity(0.72)
     }
 
     private var buttonColor: Color {

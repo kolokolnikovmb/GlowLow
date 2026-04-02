@@ -23,6 +23,26 @@ enum DayStatus: String, Codable, CaseIterable, Identifiable {
         }
     }
 
+    var symbolName: String {
+        switch self {
+        case .glow: "sparkles"
+        case .mid: "face.smiling"
+        case .low: "hand.thumbsdown"
+        }
+    }
+
+    var monochromeGlyph: String? {
+        nil
+    }
+
+    var helperCopy: String {
+        switch self {
+        case .glow: "A warm, light day."
+        case .mid: "A steady kind of day."
+        case .low: "A heavier day than usual."
+        }
+    }
+
     var colorToken: String {
         rawValue
     }

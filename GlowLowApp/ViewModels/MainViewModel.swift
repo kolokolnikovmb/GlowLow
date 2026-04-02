@@ -9,7 +9,7 @@ final class MainViewModel {
     private let hapticsService: HapticsService
 
     var todayEntry: DayEntry?
-    var selectedStatus: DayStatus?
+    var draftStatus: DayStatus?
     var noteText = ""
     var isNoteSheetPresented = false
     var showSavedToast = false
@@ -20,20 +20,25 @@ final class MainViewModel {
         loadToday()
     }
 
-    var hasEntryToday: Bool { todayEntry != nil }
-    var hasNoteToday: Bool { !(todayEntry?.textNote?.isEmpty ?? true) }
+    var hasEntryToday: Bool { todayEntry?.status != nil }
+    var hasNoteToday: Bool { !trimmedDraftNote.isEmpty }
+    var savedStatus: DayStatus? { todayEntry?.status }
+    var cardStatus: DayStatus? { draftStatus ?? savedStatus }
+    var cardNotePreview: String? { trimmedDraftNote.isEmpty ? nil : trimmedDraftNote }
+    var canSave: Bool { cardStatus != nil && hasUnsavedChanges }
+    var hasUnsavedChanges: Bool {
+        savedStatus != cardStatus || storedNote != trimmedDraftNote
+    }
 
     func loadToday() {
         todayEntry = storageService.fetchTodayEntry()
-        selectedStatus = todayEntry?.status
+        draftStatus = todayEntry?.status ?? .mid
         noteText = todayEntry?.textNote ?? ""
     }
 
     func selectStatus(_ status: DayStatus) {
-        todayEntry = storageService.upsertStatus(for: .now, status: status)
-        selectedStatus = status
-        showTransientToast()
-        hapticsService.success()
+        draftStatus = status
+        hapticsService.selection()
     }
 
     func handleSwipe(_ status: DayStatus) {
@@ -41,23 +46,23 @@ final class MainViewModel {
     }
 
     func openNoteSheet() {
-        noteText = todayEntry?.textNote ?? ""
         isNoteSheetPresented = true
     }
 
     func saveNote(_ text: String) {
-        todayEntry = storageService.upsertNote(for: .now, note: text)
-        noteText = todayEntry?.textNote ?? ""
+        noteText = String(text.prefix(160))
         isNoteSheetPresented = false
-        showTransientToast()
-        hapticsService.selection()
     }
 
-    func deleteNote() {
-        storageService.deleteNote(for: .now)
-        loadToday()
-        isNoteSheetPresented = false
-        hapticsService.warning()
+    func saveEntry() {
+        guard let status = cardStatus else { return }
+
+        _ = storageService.upsertStatus(for: .now, status: status)
+        todayEntry = storageService.upsertNote(for: .now, note: trimmedDraftNote)
+        draftStatus = status
+        noteText = todayEntry?.textNote ?? ""
+        showTransientToast()
+        hapticsService.success()
     }
 
     private func showTransientToast() {
@@ -71,5 +76,13 @@ final class MainViewModel {
                 showSavedToast = false
             }
         }
+    }
+
+    private var storedNote: String {
+        (todayEntry?.textNote ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    private var trimmedDraftNote: String {
+        noteText.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 }
